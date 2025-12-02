@@ -6,11 +6,12 @@ from langchain_core.prompts import PromptTemplate
 from langchain_community.retrievers import PineconeHybridSearchRetriever
 from pinecone import Pinecone, ServerlessSpec
 from pinecone_text.sparse import BM25Encoder
+from dotenv import load_dotenv
 import streamlit as st
 import os
 
-st.secrets['OPENAI_API_KEY']
-st.secrets['PINECONE_API_KEY']
+load_dotenv()
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 
 st.set_page_config(page_title="AI Podcast Analyzer", layout="wide")
 st.title("🎙️ AI Podcast Analyzer")
@@ -70,7 +71,6 @@ if process and video_id:
 
 question = st.text_input("Ask a question about the podcast:")
 
-# Buttons panel for different output formats
 col1, col2, col3, col4 = st.columns([1,1,1,1])
 with col1:
     get_answer_btn = st.button("Get Answer")
@@ -191,4 +191,3 @@ with export_col1:
 if st.session_state.get("last_output"):
     st.markdown("**Last generated output:**")
     st.write(st.session_state["last_output"])
-
