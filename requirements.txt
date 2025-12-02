@@ -1,0 +1,10 @@
+langchain
+langchain-community
+langchain-core
+langchain-openai
+youtube-transcript-api
+streamlit
+pinecone
+pinecone-text
+pinecone-notebooks
+wordcloud
