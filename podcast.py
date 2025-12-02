@@ -6,17 +6,15 @@ from langchain_core.prompts import PromptTemplate
 from langchain_community.retrievers import PineconeHybridSearchRetriever
 from pinecone import Pinecone, ServerlessSpec
 from pinecone_text.sparse import BM25Encoder
-from dotenv import load_dotenv
 import streamlit as st
 import os
 
-load_dotenv()
-PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+st.secrets['OPENAI_API_KEY']
+st.secrets['PINECONE_API_KEY']
 
 st.set_page_config(page_title="AI Podcast Analyzer", layout="wide")
 st.title("🎙️ AI Podcast Analyzer")
 
-# Sidebar for quick podcast input
 with st.sidebar:
     st.header("🎧 Podcast Input")
     video_id = st.text_input("YouTube Video ID")
@@ -62,7 +60,6 @@ if process and video_id:
                 index=index
             )
 
-            # index texts (simple)
             retriever.add_texts([doc.page_content for doc in documents])
 
             st.session_state["retriever"] = retriever
@@ -71,7 +68,6 @@ if process and video_id:
         except Exception as e:
             st.error(f"Error: {e}")
 
-# Main area: ask questions and produce outputs
 question = st.text_input("Ask a question about the podcast:")
 
 # Buttons panel for different output formats
@@ -85,30 +81,25 @@ with col3:
 with col4:
     top10_btn = st.button("Top 10 key points")
 
-# Export area (stores last generated text)
 if "last_output" not in st.session_state:
     st.session_state["last_output"] = ""
 
-# Minimal LLM helper (uses same LLM across actions)
 def run_llm(prompt_text, model_name="gpt-3.5-turbo"):
     llm = ChatOpenAI(model=model_name)
     out = llm.invoke(prompt_text)
     return out.content
 
-# Utility: fetch context from retriever (concise)
 def get_context_for_question(q):
     retriever = st.session_state.get("retriever")
     if not retriever:
         return ""
-    # use a retrieval call appropriate for retriever
     try:
         docs = retriever.get_relevant_documents(q)
     except Exception:
-        # fallback if method name differs
+
         docs = retriever.invoke(q) if hasattr(retriever, "invoke") else []
     return " ".join(getattr(d, "page_content", str(d)) for d in docs)
 
-# Standard prompt (no timestamp requirement; concise answer)
 answer_prompt_template = PromptTemplate(
     input_variables=["context", "question"],
     template=(
@@ -117,7 +108,6 @@ answer_prompt_template = PromptTemplate(
     )
 )
 
-# Blog prompt (<=100 tokens)
 blog_prompt_template = PromptTemplate(
     input_variables=["context", "question"],
     template=(
@@ -126,7 +116,6 @@ blog_prompt_template = PromptTemplate(
     )
 )
 
-# Newsletter prompt
 newsletter_prompt_template = PromptTemplate(
     input_variables=["context", "question"],
     template=(
@@ -135,7 +124,6 @@ newsletter_prompt_template = PromptTemplate(
     )
 )
 
-# Top 10 key points prompt
 top10_prompt_template = PromptTemplate(
     input_variables=["context", "question"],
     template=(
@@ -144,7 +132,6 @@ top10_prompt_template = PromptTemplate(
     )
 )
 
-# Handling clicks
 if get_answer_btn or blog_btn or newsletter_btn or top10_btn:
     if question.strip() == "":
         st.warning("Please enter a question first.")
@@ -181,7 +168,6 @@ if get_answer_btn or blog_btn or newsletter_btn or top10_btn:
                 st.session_state["last_output"] = out
                 st.chat_message("assistant").write(out)
 
-# Optional Export button: tries to make a simple PDF, falls back to TXT
 export_col1, export_col2 = st.columns([1,3])
 with export_col1:
     if st.button("Export last output"):
@@ -189,7 +175,6 @@ with export_col1:
         if not data:
             st.warning("No output to export yet.")
         else:
-            # try to create a tiny PDF using fpdf if available
             try:
                 from fpdf import FPDF
                 pdf = FPDF()
@@ -201,10 +186,9 @@ with export_col1:
                 pdf_bytes = pdf.output(dest="S").encode("latin-1")
                 st.download_button("Download PDF", data=pdf_bytes, file_name="podcast_output.pdf", mime="application/pdf")
             except Exception:
-                # fallback: download as txt
                 st.download_button("Download TXT", data=data, file_name="podcast_output.txt", mime="text/plain")
 
-# show last output in a small box for quick reference
 if st.session_state.get("last_output"):
     st.markdown("**Last generated output:**")
     st.write(st.session_state["last_output"])
+
