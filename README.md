@@ -1,0 +1,2 @@
+# AI-Podcast-Analyzer-Hybrid-RAG-Pinecone-OpenAI-
+An advanced AI-powered Podcast Intelligence System that automatically:  ✓ Fetches YouTube podcast transcripts ✓ Splits &amp; embeds data using OpenAI Embeddings (text-embedding-3-large) ✓ Applies Hybrid RAG (Dense + BM25 Sparse Retrieval) ✓ Stores &amp; retrieves context-efficiently using Pinecone Serverless ✓ Generates multiple LLM-driven content formats
